@@ -36,7 +36,7 @@ function Navbar() {
 
     const navIcon = {
         height: '100%',
-        aspectRatio: 1.5,
+        aspectRatio: 1,
         display: 'flex',
         fontSize: '2.2rem',
         justifyContent: 'center',
