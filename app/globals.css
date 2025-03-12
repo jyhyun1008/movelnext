@@ -230,6 +230,7 @@ blockquote:before {
     top: calc(100vh - 380px);
 }
 
+
 .name{
     position: absolute;
     z-index: 5;
