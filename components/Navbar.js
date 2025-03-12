@@ -22,7 +22,7 @@ function Navbar() {
     }
 
     const navbar = {
-        width: '100%',
+        width: 'calc(100% - 20px)',
         maxWidth: '540px',
         margin: '0 auto',
         display: 'flex',
