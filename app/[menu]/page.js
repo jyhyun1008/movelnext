@@ -2,6 +2,10 @@ import Header from "@/components/Header";
 import MarkedParser from "@/components/MarkedParser";
 import Navbar from "@/components/Navbar";
 
+export function generateStaticParams() {
+    return [{menu: process.env.NEXT_PUBLIC_MENU1}, {menu: process.env.NEXT_PUBLIC_MENU2}, {menu: process.env.NEXT_PUBLIC_MENU3}, {menu: process.env.NEXT_PUBLIC_MENU4}]
+  }
+
 export default async function Home({params}) {
 
   const menu = (await params).menu

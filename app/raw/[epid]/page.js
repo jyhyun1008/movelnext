@@ -3,6 +3,15 @@ import EpParser from "@/components/EpParser";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
+export function generateStaticParams() {
+    const episodes = process.env.NEXT_PUBLIC_PUBLICEPISODES.split(',')
+    var array = []
+    for( let ep of episodes ){
+        array.push({ epid: ep })
+    }
+    return array
+  }
+
 export default async function Home({params}) {
 
   const epid = (await params).epid
