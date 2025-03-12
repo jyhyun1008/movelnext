@@ -2,7 +2,6 @@ import Header from "@/components/Header";
 import EpParser from "@/components/EpParser";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-export const dynamic = 'force-dynamic';
 
 export default async function Home({params}) {
 
