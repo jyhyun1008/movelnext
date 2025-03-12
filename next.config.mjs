@@ -12,5 +12,5 @@ export default withPWA({
       unoptimized: true,
     },
     basePath: "/movelnext",
-    assetPrefix: "/movelnext/",
+    assetPrefix: "/",
 });
