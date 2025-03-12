@@ -1,8 +1,11 @@
 'use client'
 //import MarkedParser from "@/components/MarkedParser";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation'
 
 export default function Home({epid}) {
+  const router = useRouter()
+  const [bgm, setBgm] = useState(null)
 
   const feedWrapper = {
     height: 'calc(100dvh - 20px - 8rem)',
@@ -12,7 +15,7 @@ export default function Home({epid}) {
 
   useEffect(()=>{
 
-if (epid) {
+  if (epid) {
     
     var content = document.querySelector('.content');
     content.innerHTML = `<div id="player"><div id="background"><div id="chr"></div></div><div id="title"><div id="mainTitle" style="color: #${process.env.NEXT_PUBLIC_THEME}"></div><div id="subTitle"></div></div><div id="lineBox"><div id="name" class="name" style="background-color: #${process.env.NEXT_PUBLIC_THEME}"></div><div id="line" style="
@@ -283,6 +286,7 @@ function grayScale(){
                     bgmArray[formerj].pause(); bgmArray[j].play();
                 } else if (!bgmArray[j]) {
                     bgmArray[j] = new Audio(); bgmArray[formerj].pause();
+                    setBgm(bgmArray[j])
                 } if (soundArray[j]) {
                     soundArray[j].loop = false; soundArray[j].play();
                 }
@@ -431,6 +435,14 @@ function grayScale(){
                 }
             }
         });
+
+        document.body.addEventListener('click', (event) => {
+          if (location.href.split('/ep/')[1] != epid) {
+            
+          bgmArray[j].pause()
+          soundArray[j].pause()
+          }
+        })
         
         function typeLine(l1, l2, l3){
 
@@ -601,6 +613,13 @@ function play(inputText){
 }
 
   },[])
+
+  // useEffect(() => {
+  //   if (bgm) {
+  //     bgm.pause();
+  //     bgm.currentTime = 0
+  //   }
+  // }, [router.asPath])
 
   return (
         <div className="content">

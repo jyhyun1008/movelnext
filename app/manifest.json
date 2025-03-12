@@ -1,0 +1,17 @@
+{
+    "name": "MOVEL",
+    "short_name": "모블",
+    "icons": [
+      {
+        "src": "/logo.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      }
+    ],
+    "theme_color": "#eceff3",
+    "background_color": "#eceff3",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait"
+  }
