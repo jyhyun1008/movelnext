@@ -6,14 +6,11 @@ const withPWA = withPWAInit({
 
 
 
-export default withPWA(()=>{
-  // Your Next.js config
-  const nextConfig = {
+export default withPWA({
     output: "export",
     images: {
-      unoptimized: true, // GitHub Pages에서는 SSR 이미지 최적화 미지원
+      unoptimized: true,
     },
-    basePath: "/movelnext", // GitHub Pages에서는 필수
-    assetPrefix: "/movelnext/",
-  };
+    basePath: "/YOUR_REPOSITORY_NAME",
+    assetPrefix: "/YOUR_REPOSITORY_NAME/",
 });
