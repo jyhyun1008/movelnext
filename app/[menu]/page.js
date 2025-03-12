@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import MarkedParser from "@/components/MarkedParser";
 import Navbar from "@/components/Navbar";
 
+export const dynamic = 'force-dynamic';
 export default async function Home({params}) {
 
   const menu = (await params).menu
