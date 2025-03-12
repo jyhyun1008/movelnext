@@ -11,6 +11,6 @@ export default withPWA({
     images: {
       unoptimized: true,
     },
-    basePath: "/YOUR_REPOSITORY_NAME",
-    assetPrefix: "/YOUR_REPOSITORY_NAME/",
+    basePath: "/movelnext",
+    assetPrefix: "/movelnext/",
 });
