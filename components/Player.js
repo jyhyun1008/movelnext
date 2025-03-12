@@ -37,7 +37,7 @@ if (epid) {
     var mute = document.querySelector('#mute');
     var raw = document.querySelector('#raw');
 
-    var url = `${process.env.NEXT_PUBLIC_URL}/ep/${epid}.md`;
+    var url = `${process.env.NEXT_PUBLIC_REPO}/ep/${epid}.md`;
     fetch(url)
     .then(res => res.text())
     .then((out) => {
@@ -335,7 +335,7 @@ function grayScale(){
         
         pageLoad(j, 0);
         
-        raw.addEventListener("click", function(){ window.location.href = `${process.env.NEXT_PUBLIC_URL}/raw/${epid}`});
+        raw.addEventListener("click", function(){ window.location.href = `${process.env.NEXT_PUBLIC_REPO}/raw/${epid}`});
         mute.addEventListener("click", function(){
             if (muteBool == false){
                 muteBool = true;

@@ -13,7 +13,7 @@ export default async function Home({params}) {
     marginBottom: '4rem',
   }
 
-  const markdown = await fetch(`${process.env.NEXT_PUBLIC_URL}/md/${menu}.md`)
+  const markdown = await fetch(`${process.env.NEXT_PUBLIC_REPO}/md/${menu}.md`)
   const mdraw = await markdown.text()
 
   const mdStyle = {
