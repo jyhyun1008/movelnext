@@ -1,12 +1,9 @@
 'use client'
 //import MarkedParser from "@/components/MarkedParser";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 export default function Home({epid}) {
 
-    const router = useRouter()
-    
   const feedWrapper = {
     height: 'calc(100dvh - 20px - 8rem)',
     overflow: 'auto',
@@ -359,12 +356,6 @@ function grayScale(){
         });
 
         document.documentElement.style.setProperty('--theme', `${options.theme}`);
-
-    const exitingFunction = () => {
-        bgmArray[j].pause();
-      };
-  
-      router.events.on("routeChangeStart", exitingFunction);
 
         document.body.addEventListener("keydown", function(event){
             switch(event.keyCode){
