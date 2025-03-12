@@ -13,7 +13,7 @@ export default withPWA(()=>{
     images: {
       unoptimized: true, // GitHub Pages에서는 SSR 이미지 최적화 미지원
     },
-    basePath: "/jyhyun1008", // GitHub Pages에서는 필수
+    basePath: "/movelnext", // GitHub Pages에서는 필수
     assetPrefix: "/movelnext/",
   };
 });
