@@ -166,7 +166,7 @@ blockquote:before {
     z-index: 0;
     top: 60px;
     left: max(calc(50vw - 270px), 0);
-    width: 100%;
+    width: calc(100% - 20px);
     max-width: 540px;
     height: calc(100dvh - 20px - 6rem);
     overflow: hidden;
