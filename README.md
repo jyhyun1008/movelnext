@@ -30,7 +30,7 @@ docker compose up -d --build
 
 - 콘텐츠는 `./data` 폴더에 저장됩니다 (컨테이너를 지우거나 새로 빌드해도 유지). **백업 대상은 이 폴더 하나**입니다.
 - `data`가 비어 있으면 첫 실행 때 `seed/`로 채워집니다.
-- 컨테이너는 `127.0.0.1:3000`에만 열려 있으므로 같은 서버의 nginx로 프록시합니다.
+- 컨테이너는 `127.0.0.1:<MOVEL_PORT>`(기본 3000)에만 열려 있으므로 같은 서버의 nginx로 프록시합니다. 포트는 `.env`의 `MOVEL_PORT`로 바꿉니다.
 
 업데이트:
 
@@ -46,7 +46,7 @@ server {
     client_max_body_size 50m;   # 미디어 업로드
 
     location / {
-        proxy_pass http://127.0.0.1:3000;
+        proxy_pass http://127.0.0.1:3000;   # .env의 MOVEL_PORT와 맞춘다
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;

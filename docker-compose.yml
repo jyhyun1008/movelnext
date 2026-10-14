@@ -10,7 +10,7 @@ services:
     environment:
       DATA_DIR: /data
     ports:
-      # nginx가 같은 서버에 있으면 외부에 열지 않고 로컬에만 연다
-      - "127.0.0.1:3000:3000"
+      # 서버의 127.0.0.1:${MOVEL_PORT} → 컨테이너 3000. 외부에는 열지 않고 nginx로 프록시한다
+      - "127.0.0.1:${MOVEL_PORT:-3000}:3000"
     volumes:
       - ./data:/data
