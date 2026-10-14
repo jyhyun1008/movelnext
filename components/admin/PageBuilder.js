@@ -14,7 +14,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { savePageCards, uploadThumb } from "@/app/admin/actions";
 import Cards from "@/components/Cards";
-import { emptyCard, newId } from "@/lib/cards";
+import { emptyCard, emptySection, newId } from "@/lib/cards";
 
 /* ---------- 이미지 선택 ---------- */
 
@@ -209,9 +209,73 @@ function CardEditor({ card, open, onToggle, onChange, onRemove, onDuplicate, gro
   );
 }
 
+/* ---------- 섹션 하나의 카드 목록 ---------- */
+
+function LayoutToggle({ value, onChange }) {
+  return (
+    <div className="segmented" role="group" aria-label="배치">
+      <button type="button" aria-pressed={value === "list"} onClick={() => onChange("list")}>
+        목록형
+      </button>
+      <button type="button" aria-pressed={value === "grid"} onClick={() => onChange("grid")}>
+        그리드형
+      </button>
+    </div>
+  );
+}
+
+function SectionCards({ section, onChange, openId, setOpenId, sensors, groups, episodes, onUploaded }) {
+  const setCards = (fn) => onChange((s) => ({ ...s, cards: fn(s.cards) }));
+
+  function addCard() {
+    const card = emptyCard();
+    setCards((cs) => [...cs, card]);
+    setOpenId(card.id);
+  }
+
+  function onDragEnd({ active, over }) {
+    if (!over || active.id === over.id) return;
+    setCards((cs) => arrayMove(cs, cs.findIndex((c) => c.id === active.id), cs.findIndex((c) => c.id === over.id)));
+  }
+
+  return (
+    <>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <SortableContext items={section.cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+          <ul className="builder-list">
+            {section.cards.map((card) => (
+              <CardEditor
+                key={card.id}
+                card={card}
+                open={openId === card.id}
+                onToggle={() => setOpenId((id) => (id === card.id ? null : card.id))}
+                onChange={(next) => setCards((cs) => cs.map((c) => (c.id === next.id ? next : c)))}
+                onRemove={() => setCards((cs) => cs.filter((c) => c.id !== card.id))}
+                onDuplicate={() =>
+                  setCards((cs) => {
+                    const i = cs.findIndex((c) => c.id === card.id);
+                    const copy = { ...card, id: newId(), links: card.links.map((l) => ({ ...l })) };
+                    return [...cs.slice(0, i + 1), copy, ...cs.slice(i + 1)];
+                  })
+                }
+                groups={groups}
+                episodes={episodes}
+                onUploaded={onUploaded}
+              />
+            ))}
+          </ul>
+        </SortableContext>
+      </DndContext>
+      <button type="button" className="add-card" onClick={addCard}>
+        + 카드 추가
+      </button>
+    </>
+  );
+}
+
 /* ---------- 편집기 ---------- */
 
-export default function PageBuilder({ slug, initial, mediaGroups, episodes, mark, viewHref }) {
+export default function PageBuilder({ slug, initial, mediaGroups, episodes, mark, viewHref, multiSection }) {
   const [page, setPage] = useState(initial);
   const [saved, setSaved] = useState(initial);
   const [openId, setOpenId] = useState(null);
@@ -233,18 +297,20 @@ export default function PageBuilder({ slug, initial, mediaGroups, episodes, mark
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
-  const setCards = (fn) => setPage((p) => ({ ...p, cards: fn(p.cards) }));
-  const updateCard = (card) => setCards((cs) => cs.map((c) => (c.id === card.id ? card : c)));
+  const updateSection = (id, fn) => setPage((p) => ({ ...p, sections: p.sections.map((s) => (s.id === id ? fn(s) : s)) }));
 
-  function addCard() {
-    const card = emptyCard();
-    setCards((cs) => [...cs, card]);
-    setOpenId(card.id);
+  function addSection() {
+    const section = emptySection();
+    setPage((p) => ({ ...p, sections: [...p.sections, section] }));
   }
 
-  function onDragEnd({ active, over }) {
-    if (!over || active.id === over.id) return;
-    setCards((cs) => arrayMove(cs, cs.findIndex((c) => c.id === active.id), cs.findIndex((c) => c.id === over.id)));
+  function moveSection(i, d) {
+    setPage((p) => ({ ...p, sections: arrayMove(p.sections, i, i + d) }));
+  }
+
+  function removeSection(section) {
+    if (section.cards.length && !window.confirm(`‘${section.title || "제목 없는 섹션"}’과 안의 카드 ${section.cards.length}장을 삭제할까요?`)) return;
+    setPage((p) => ({ ...p, sections: p.sections.filter((s) => s.id !== section.id) }));
   }
 
   function onUploaded({ name, src }) {
@@ -262,17 +328,16 @@ export default function PageBuilder({ slug, initial, mediaGroups, episodes, mark
     });
   }
 
+  const single = !multiSection;
+  const first = page.sections[0];
+  const sectionProps = { openId, setOpenId, sensors, groups, episodes, onUploaded };
+
   return (
     <div className="builder">
       <div className="builder-toolbar">
-        <div className="segmented" role="group" aria-label="배치">
-          <button type="button" aria-pressed={page.layout === "list"} onClick={() => setPage((p) => ({ ...p, layout: "list" }))}>
-            목록형
-          </button>
-          <button type="button" aria-pressed={page.layout === "grid"} onClick={() => setPage((p) => ({ ...p, layout: "grid" }))}>
-            그리드형
-          </button>
-        </div>
+        {single && first && (
+          <LayoutToggle value={first.layout} onChange={(layout) => updateSection(first.id, (s) => ({ ...s, layout }))} />
+        )}
         <span className="toolbar-status">
           {status?.error ? (
             <span className="danger-text">{status.error}</span>
@@ -291,35 +356,47 @@ export default function PageBuilder({ slug, initial, mediaGroups, episodes, mark
 
       <div className="split">
         <div>
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-            <SortableContext items={page.cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-              <ul className="builder-list">
-                {page.cards.map((card) => (
-                  <CardEditor
-                    key={card.id}
-                    card={card}
-                    open={openId === card.id}
-                    onToggle={() => setOpenId((id) => (id === card.id ? null : card.id))}
-                    onChange={updateCard}
-                    onRemove={() => setCards((cs) => cs.filter((c) => c.id !== card.id))}
-                    onDuplicate={() =>
-                      setCards((cs) => {
-                        const i = cs.findIndex((c) => c.id === card.id);
-                        const copy = { ...card, id: newId(), links: card.links.map((l) => ({ ...l })) };
-                        return [...cs.slice(0, i + 1), copy, ...cs.slice(i + 1)];
-                      })
-                    }
-                    groups={groups}
-                    episodes={episodes}
-                    onUploaded={onUploaded}
-                  />
-                ))}
-              </ul>
-            </SortableContext>
-          </DndContext>
-          <button type="button" className="add-card" onClick={addCard}>
-            + 카드 추가
-          </button>
+          {single ? (
+            first && <SectionCards section={first} onChange={(fn) => updateSection(first.id, fn)} {...sectionProps} />
+          ) : (
+            <>
+              {page.sections.length === 0 && <p className="hint">섹션을 추가해 소제목과 카드 목록을 만들어 보세요.</p>}
+              {page.sections.map((section, i) => (
+                <div className="builder-section" key={section.id}>
+                  <div className="builder-section-head">
+                    <input
+                      type="text"
+                      value={section.title}
+                      placeholder="소제목 (예: 공지, 굿즈, 활동)"
+                      onChange={(e) => updateSection(section.id, (s) => ({ ...s, title: e.target.value }))}
+                    />
+                    <LayoutToggle value={section.layout} onChange={(layout) => updateSection(section.id, (s) => ({ ...s, layout }))} />
+                    <div className="row-tools">
+                      <button type="button" className="linklike" disabled={i === 0} onClick={() => moveSection(i, -1)} aria-label="섹션 위로">
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        className="linklike"
+                        disabled={i === page.sections.length - 1}
+                        onClick={() => moveSection(i, 1)}
+                        aria-label="섹션 아래로"
+                      >
+                        ↓
+                      </button>
+                      <button type="button" className="linklike danger-text" onClick={() => removeSection(section)}>
+                        섹션 삭제
+                      </button>
+                    </div>
+                  </div>
+                  <SectionCards section={section} onChange={(fn) => updateSection(section.id, fn)} {...sectionProps} />
+                </div>
+              ))}
+              <button type="button" className="add-card add-section" onClick={addSection}>
+                + 섹션 추가
+              </button>
+            </>
+          )}
         </div>
         <div className="preview page-preview">
           <Cards page={page} mark={mark} />

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import PageBuilder from "@/components/admin/PageBuilder";
+import { emptySection } from "@/lib/cards";
 import { listEpisodesWithTitles } from "@/lib/content";
 import { getPage, getSettings, listMedia } from "@/lib/storage";
 
@@ -14,6 +15,11 @@ export default async function EditPage({ params }) {
   if (!label) notFound();
   const [page, media, episodes] = await Promise.all([getPage(slug), listMedia(), listEpisodesWithTitles({ includeDrafts: true })]);
 
+  // 홈 하단만 섹션(소제목 + 카드 목록)을 여러 개 둘 수 있다. 메뉴 페이지는 카드 목록 하나.
+  const multiSection = slug === "index";
+  const initial = page ?? { sections: [] };
+  if (!multiSection && initial.sections.length === 0) initial.sections.push(emptySection());
+
   const mediaGroups = [
     { label: "썸네일", items: items("thumb", media.thumb) },
     { label: "배경", items: items("bg", media.bg) },
@@ -26,7 +32,8 @@ export default async function EditPage({ params }) {
       <PageBuilder
         key={slug}
         slug={slug}
-        initial={page ?? { layout: "list", cards: [] }}
+        initial={initial}
+        multiSection={multiSection}
         mediaGroups={mediaGroups}
         episodes={episodes.map((e) => ({ id: e.id, label: e.subtitle || e.title || e.id }))}
         mark={headingMark}

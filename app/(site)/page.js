@@ -1,6 +1,7 @@
 import Link from "next/link";
 import EpisodeList from "@/components/EpisodeList";
 import Cards from "@/components/Cards";
+import { pageHasContent } from "@/lib/cards";
 import { listEpisodesWithTitles } from "@/lib/content";
 import { getCharacters, getPage, getSettings, listMedia } from "@/lib/storage";
 
@@ -95,11 +96,7 @@ export default async function Home() {
           </section>
         )}
 
-        {page?.cards.length > 0 && (
-          <section className="landing-block">
-            <Cards page={page} mark={settings.headingMark} />
-          </section>
-        )}
+        {pageHasContent(page) && <Cards page={page} mark={settings.headingMark} sectionClass="landing-block" />}
       </div>
     </div>
   );
