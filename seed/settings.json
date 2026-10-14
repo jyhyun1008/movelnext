@@ -3,7 +3,7 @@
   "description": "",
   "heroImage": "",
   "author": "",
-  "theme": "#611FDA",
+  "theme": "#3ddbe1",
   "headingMark": "",
   "menus": [
     { "slug": "intro", "label": "소개" },
