@@ -1,0 +1,14 @@
+{
+  "title": "시리즈 제목",
+  "description": "",
+  "heroImage": "",
+  "author": "",
+  "theme": "#611FDA",
+  "headingMark": "",
+  "menus": [
+    { "slug": "intro", "label": "소개" },
+    { "slug": "character", "label": "캐릭터" },
+    { "slug": "story", "label": "스토리" },
+    { "slug": "music", "label": "음악" }
+  ]
+}

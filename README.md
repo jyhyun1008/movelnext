@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MOVEL
 
-## Getting Started
+마크다운으로 쓰는 웹 비주얼 노벨 사이트. Next.js 서버로 동작하며 `/admin`에서 콘텐츠를 관리합니다.
 
-First, run the development server:
+## 구조
+
+| 경로 | 내용 |
+| --- | --- |
+| `seed/` | 초기 콘텐츠. `data/`가 비어 있으면 최초 실행 시 복사됨 |
+| `data/` | 실제 콘텐츠 (설정, 페이지, 에피소드, 미디어). git에 포함되지 않음 → **백업 대상** |
+| `lib/episode.js` | 에피소드 스크립트 파서 |
+| `components/Player.js` | 플레이어 |
+| `app/admin/` | 관리자 화면 |
+
+## 개발
 
 ```bash
+cp .env.example .env   # ADMIN_PASSWORD, SESSION_SECRET 채우기
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 서버 배포 (Docker)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+git clone <repo> movel && cd movel
+cp .env.example .env && vi .env      # ADMIN_PASSWORD, SESSION_SECRET 설정
+docker compose up -d --build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 콘텐츠는 `./data` 폴더에 저장됩니다 (컨테이너를 지우거나 새로 빌드해도 유지). **백업 대상은 이 폴더 하나**입니다.
+- `data`가 비어 있으면 첫 실행 때 `seed/`로 채워집니다.
+- 컨테이너는 `127.0.0.1:3000`에만 열려 있으므로 같은 서버의 nginx로 프록시합니다.
 
-## Learn More
+업데이트:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+git pull && docker compose up -d --build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### nginx
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```nginx
+server {
+    server_name example.com;
+    client_max_body_size 50m;   # 미디어 업로드
 
-## Deploy on Vercel
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+HTTPS는 certbot 등으로 설정합니다. HTTPS 없이 IP로 먼저 테스트할 때는 `.env`에 `COOKIE_SECURE=false`를 넣어야 로그인이 유지됩니다.

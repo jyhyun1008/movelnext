@@ -1,70 +1,42 @@
 import "./globals.css";
+import { getSettings } from "@/lib/storage";
 
-export const viewport = {
-  themeColor: `#${process.env.NEXT_PUBLIC_THEME}`,
-};
+// 콘텐츠를 어드민에서 수정하므로 빌드 시점이 아닌 요청 시점에 렌더링
+export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: process.env.NEXT_PUBLIC_TITLE,
-  description: process.env.NEXT_PUBLIC_DESCRIPTION,
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: process.env.NEXT_PUBLIC_TITLE
-    // startUpImage: [],
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  openGraph: {
-    type: "website",
-    siteName: process.env.NEXT_PUBLIC_TITLE,
-    title: {
-      default: process.env.NEXT_PUBLIC_TITLE,
-    },
-    description: process.env.NEXT_PUBLIC_DESCRIPTION,
-  },
-  twitter: {
-    card: "summary",
-    title: {
-      default: process.env.NEXT_PUBLIC_TITLE,
-    },
-    description: process.env.NEXT_PUBLIC_DESCRIPTION,
-  },
-};
-
-const bodyStyle = {
-  background: 'var(--bg)'
+export async function generateMetadata() {
+  const { title, description } = await getSettings();
+  return {
+    title: { default: title, template: `%s · ${title}` },
+    description,
+    appleWebApp: { capable: true, title },
+    formatDetection: { telephone: false },
+    openGraph: { type: "website", siteName: title, title, description },
+    twitter: { card: "summary", title, description },
+  };
 }
 
-const appStyle = {
-  color: `#${process.env.NEXT_PUBLIC_THEME}`,
-  width: 'calc(100% - 20px)',
-  maxWidth: '540px',
-  height: 'calc(100dvh - 20px)',
-  margin: '10px auto',
-  borderRadius: '20px',
-  background: 'var(--white)',
-  boxShadow: `5px 5px 15px #00005511`,
-  overflow: 'hidden',
+export async function generateViewport() {
+  const { theme } = await getSettings();
+  return { themeColor: theme };
 }
 
-export default function RootLayout({ children }) {
+const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
+
+export default async function RootLayout({ children }) {
+  const { theme } = await getSettings();
   return (
-    <html lang="en">
+    <html lang="ko" style={{ "--brand": theme }} suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content={`#${process.env.NEXT_PUBLIC_THEME}`} />
-        <meta name="theme-color" content={`#${process.env.NEXT_PUBLIC_THEME}`} />
-        <link rel= "stylesheet" href= "https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css" />
+        {/* 첫 화면을 그리기 전에 저장된 테마를 적용해 깜빡임을 막는다 */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="" />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
       </head>
-      <body style={bodyStyle}>
-        <div style={appStyle}>
-          {children}
-        </div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

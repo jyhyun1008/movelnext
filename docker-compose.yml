@@ -1,0 +1,16 @@
+name: movel
+
+
+services:
+  movel:
+    build: .
+    image: movel:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+    ports:
+      # nginx가 같은 서버에 있으면 외부에 열지 않고 로컬에만 연다
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./data:/data
